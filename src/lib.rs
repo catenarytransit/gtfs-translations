@@ -246,4 +246,27 @@ pub fn translation_csv_text_to_translations(data: &str) -> Result<TranslationRes
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokio::*;
+    use std::path::Path;
+    use std::fs::File;
+    use std::io::prelude::*;
+
+    #[tokio::test]
+    async fn test() {
+        let feed = "https://odp-pref-tottori.tori-info.co.jp/bus_data/1.zip";
+
+        let response = reqwest::get(feed).await.unwrap();
+
+        println!("Download finished!");
+
+        let path = Path::new("./1.zip");
+
+        let mut file = match File::create(&path) {
+            Err(why) => panic!("couldn't create {}", why),
+            Ok(file) => file,
+        };
+
+        let content =  response.text().await.unwrap();
+        file.write_all(content.as_bytes()).unwrap();
+    }
 }
